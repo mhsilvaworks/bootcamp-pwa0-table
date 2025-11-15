@@ -1,0 +1,41 @@
+name: CI - Bootcamp PWA
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Fazer o checkout do codigo
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar o Node.js (v20)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 3. Instalar dependencias da API
+        run: cd apps/api && npm ci
+
+      - name: 4. Instalar dependencias do PWA (Web)
+        run: cd apps/web && npm ci
+
+      - name: 5. Rodar testes da API (se houver)
+        run: cd apps/api && npm test --if-present
+
+      - name: 6. Rodar testes do PWA (se houver)
+        run: cd apps/web && npm test --if-present
+
+      - name: 7. Fazer o Build do PWA (Web)
+        run: cd apps/web && npm run build
+
+      - name: 8. Fazer upload do artefato (pasta 'dist')
+        uses: actions/upload-artifact@v4
+        with:
+          name: pwa-fipe-build
+          path: apps/web/dist
